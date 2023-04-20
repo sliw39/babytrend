@@ -1,3 +1,6 @@
+
+declare var API_KEY:string;
+
 export type SurveyType = "Change" | "Someil" | "Bain" | "Repas" | "Visite";
 export interface Survey {
     date: number,
@@ -18,7 +21,7 @@ export async function save(data: Survey & {_id?: string}): Promise<Survey> {
         method: data._id ? "PUT" : "POST",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "x-apikey": "643fd50639cf552ef728c2f6",
+            "x-apikey": API_KEY,
         },
         body: JSON.stringify(data),
     }).then((res) => res.json())
@@ -29,7 +32,7 @@ export async function remove(id: string): Promise<Survey> {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "x-apikey": "643fd50639cf552ef728c2f6",
+            "x-apikey": API_KEY,
         },
     }).then((res) => res.json())
 }
@@ -78,7 +81,7 @@ export async function load(query: SurveyQuery, max?: number, skip = 0, sortBy: {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "x-apikey": "643fd50639cf552ef728c2f6",
+            "x-apikey": API_KEY,
         },
     }).then((res) => res.json())
 }
@@ -89,7 +92,7 @@ export async function count(query: SurveyQuery): Promise<number> {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "x-apikey": "643fd50639cf552ef728c2f6",
+            "x-apikey": API_KEY,
         },
     }).then((res) => res.json()).then((res) => res.totals.count)
 }
@@ -100,7 +103,7 @@ export async function get(surveyId: string): Promise<Survey> {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
-            "x-apikey": "643fd50639cf552ef728c2f6",
+            "x-apikey": API_KEY,
         },
     }).then((res) => res.json())
 }
