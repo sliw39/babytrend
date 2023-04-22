@@ -40,6 +40,17 @@
                             time: {
                                 unit: 'day'
                             }
+                        },
+                        x: {
+                            type: 'linear',
+                            min: 0,
+                            max: 24,
+                            ticks: {
+                                stepSize: 1,
+                                callback(tickValue, index, ticks) {
+                                    return moment(tickValue, 'HH').format('HH:mm');
+                                },
+                            },
                         }
                     },
                     plugins: {
@@ -47,7 +58,9 @@
                             callbacks: {
                                 label: function(context) {
                                     const date = moment(context.parsed.y).format('DD/MM/YYYY');
-                                    const time = moment(context.parsed.x, 'HH').format('HH:mm');
+                                    const hours = Math.floor(context.parsed.x);
+                                    const minutes = Math.round((context.parsed.x - hours) * 60);
+                                    const time = moment({ hours, minutes }).format('HH:mm');
                                     return `${date} ${time}`;
                                 }
                             }

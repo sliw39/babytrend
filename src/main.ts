@@ -15,6 +15,7 @@ createApp(App).use(createRouter({routes: [
     {path: '/survey', component: () => import('./components/Survey.vue')},
     {path: '/', component: () => import('./components/Dashboard.vue')},
     {path: '/weight', component: () => import('./components/WeightChart.vue')},
+    {path: '/height', component: () => import('./components/HeightChart.vue')},
     {path: '/meals', component: () => import('./components/Meals.vue')},
 ], history: createWebHashHistory()})).use(createVuetify({
     components: {...components, VDataTableServer},
