@@ -9,7 +9,7 @@
         <li><router-link to="/survey">Saisie</router-link></li>
         <li><router-link to="/weight">Courbe de poids</router-link></li>
         <li><router-link to="/height">Courbe de taille</router-link></li>
-        <li><router-link to="/meals">Repas</router-link></li>
+        <li><router-link to="/data">Données brutes</router-link></li>
       </ul>
     </v-navigation-drawer>
 
@@ -53,6 +53,6 @@
   .title-app h1 {
     margin-left: 1.5em;
     font-size: 2em;
-    font-family: 'URW Chancery L, cursive';
+    font-family: cursive;
   }
 </style>

@@ -55,7 +55,10 @@
         limit?: number;
     }
 
-    const { query, limit } = defineProps<ListViewProps>();
+    const { query, limit } = withDefaults(defineProps<ListViewProps>(), {
+      limit: 20, 
+    });
+    const emits = defineEmits(["updated"]);
 
     const loading = ref(false);
     const total = ref(0);
@@ -119,6 +122,7 @@
 
     async function deleteItem(item: any) {
         await remove(item.raw._id);
+        emits("updated");
     }
 
     let data = ref<DataTableData[]>([]);

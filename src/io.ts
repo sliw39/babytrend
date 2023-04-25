@@ -66,7 +66,7 @@ function buildQuery(query: SurveyQuery): string {
     return JSON.stringify(q);
 }
 
-export async function load(query: SurveyQuery, max?: number, skip = 0, sortBy: {key:string, order: 'asc'|'desc'}[] = [{key: "date", order: "desc"}]): Promise<Survey[]> {
+export async function load(query: SurveyQuery = {}, max?: number, skip = 0, sortBy: {key:string, order: 'asc'|'desc'}[] = [{key: "date", order: "desc"}]): Promise<Survey[]> {
 
     let additionnalQuery = "";
     if (typeof max === "number") {
@@ -86,7 +86,7 @@ export async function load(query: SurveyQuery, max?: number, skip = 0, sortBy: {
     }).then((res) => res.json())
 }
 
-export async function count(query: SurveyQuery): Promise<number> {
+export async function count(query: SurveyQuery = {}): Promise<number> {
 
     return fetch("https://babytrend-0d4f.restdb.io/rest/survey?totals=true&count=true&q=" + buildQuery(query), {
         method: "GET",

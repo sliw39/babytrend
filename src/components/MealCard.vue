@@ -1,5 +1,5 @@
 <template>
-<div style="display: flex; padding: 2em;">
+<div style="display: flex; padding: .5em;">
     <v-card :color="blurp ? 'rgb(255, 99, 132)' : 'rgb(75, 192, 192)'" class="pa-2" outlined tile v-if="!loading">
         <v-card-title>{{ props.title }}</v-card-title>
         <v-card-subtitle>{{ dateStr }}</v-card-subtitle>
@@ -22,6 +22,8 @@
     const props = withDefaults(defineProps<LastMealProps>(), {
         title: 'Dernier repas'
     });
+
+    const emits = defineEmits(["updated"]);
 
     const dateStr = ref('');
     const blurp = ref(false);
@@ -52,6 +54,7 @@
             survey.blurp = blurp.value;
             await save(survey);
             updating.value = false;
+            emits("updated");
         }
     }
 </script>
