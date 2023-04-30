@@ -15,17 +15,17 @@
     </template>
 
     <template v-slot:item.events="{ item }">
-        <v-icon :color="item.raw.events.pee ? 'black' : 'grey'" icon="mdi-water"></v-icon>
-        <v-icon :color="item.raw.events.poop ? 'black' : 'grey'" icon="mdi-emoticon-poop"></v-icon>
-        <v-icon :color="item.raw.events.blurp ? 'black' : 'grey'" icon="mdi-emoticon-sick"></v-icon>
-        <v-icon :color="item.raw.events.eat ? 'black' : 'grey'" icon="mdi-baby-bottle"></v-icon>
+        <v-icon :color="item.raw.events.pee ? undefined : 'grey'" :icon="EVENT_TYPE_ICONS['pee']"></v-icon>
+        <v-icon :color="item.raw.events.poop ? undefined : 'grey'" :icon="EVENT_TYPE_ICONS['poop']"></v-icon>
+        <v-icon :color="item.raw.events.blurp ? undefined : 'grey'" :icon="EVENT_TYPE_ICONS['blurp']"></v-icon>
+        <v-icon :color="item.raw.events.eat ? undefined : 'grey'" :icon="EVENT_TYPE_ICONS['eat']"></v-icon>
     </template>
 
     <template v-slot:item.actions="{ item }">
       <v-icon
         size="small"
         class="me-2"
-        @click="editItem(item.raw)"
+        @click="gotoDetail(item.raw)"
       >
         mdi-pencil
       </v-icon>
@@ -50,6 +50,8 @@
 <script setup lang="ts">
     import { onMounted, ref } from 'vue';
     import { Survey, SurveyQuery, count, load, remove } from '../io';
+import { gotoDetail } from '../navigation';
+import { EVENT_TYPE_ICONS } from '../consts';
     export interface ListViewProps {
         query: SurveyQuery;
         limit?: number;
@@ -114,10 +116,6 @@
             events: { pee: s.pee || false, poop: s.poop|| false, blurp: s.blurp|| false, eat: s.eat|| false },
             raw: s
         }));
-    }
-    
-    function editItem(item: any) {
-        document.location.href = `#/survey/${item.raw._id}`;
     }
 
     async function deleteItem(item: any) {

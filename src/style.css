@@ -78,3 +78,16 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.mdi-baby-bottle {
+  color: rgb(75, 192, 192);
+}
+.mdi-emoticon-poop {
+  color: rgb(153, 102, 0);
+}
+.mdi-water {
+  color: rgb(255, 205, 86);
+}
+.mdi-emoticon-sick {
+  color: rgb(255, 99, 132);
+}

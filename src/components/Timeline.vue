@@ -1,203 +1,166 @@
 <template>
-    <div class="timeline-chart">
-        <v-btn-toggle v-model="display">
-            <v-btn value="chart"><v-icon>mdi-chart-scatter-plot</v-icon></v-btn>
-            <v-btn value="table"><v-icon>mdi-table</v-icon></v-btn>
-        </v-btn-toggle>
-        <canvas ref="chartref" v-show="display === 'chart'"></canvas>
-        <table v-if="display === 'table'">
-            <tbody>
-                <tr v-for="d of tableSet" :key="d.day">
-                    <th>{{ d.day }}</th>
-                    <td v-for="e of d.events" @click="gotoDetail(e.id)"><span>{{ e.time }}</span><div style="display: flex;"><v-icon v-for="i of e.icons">{{ i }}</v-icon></div></td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- a vertical timeline with infinite scroll -->
+    <div class="timeline">
+        <div class="timeline__container" ref="container">
+            <div class="timeline__item" v-for="event in events" :key="event._id" @click="gotoDetail(event)">
+                <div class="timeline__item__cicle" :style="{backgroundColor: SURVEY_TYPE_COLORS[event.type]}">
+                    <v-icon :icon="SURVEY_TYPE_ICONS[event.type]"></v-icon>
+                </div>
+                <div class="timeline__datemilestone">
+                    <div class="timeline__datemilestone__date" v-if="isFirstOfDay(event)">{{ moment(event.date).format('DD/MM') }}</div>
+                </div>                
+                <div class="timeline__content">
+                    <div class="timeline__title">{{event.type}}</div>
+                    <div class="timeline__date">{{ moment(event.date).format('HH:mm') }}</div>
+                    <div class="timeline__description">
+                        <v-icon v-if="event.pee" :icon="EVENT_TYPE_ICONS['pee']"></v-icon>
+                        <v-icon v-if="event.poop" :icon="EVENT_TYPE_ICONS['poop']"></v-icon>
+                        <v-icon v-if="event.blurp" :icon="EVENT_TYPE_ICONS['blurp']"></v-icon>
+                        <v-icon v-if="event.eat" :icon="EVENT_TYPE_ICONS['eat']"></v-icon>
+                    </div>
+                </div>
+            </div>
+            <!-- loader -->
+            <div class="timeline__loader" ref="loader">
+                <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-    import Chart from 'chart.js/auto';
-    import "chartjs-adapter-moment";
-    import { onMounted, ref, onUnmounted, computed, watch } from 'vue';
+    import { ref } from 'vue';
     import { Survey, load } from '../io';
     import moment from 'moment';
+import { gotoDetail } from '../navigation';
+import { EVENT_TYPE_ICONS, SURVEY_TYPE_COLORS, SURVEY_TYPE_ICONS } from '../consts';
 
+    const events = ref([] as (Survey & {_id?: string})[]);
+    const batchSize = 30;
 
-    const display = ref<("table"|"chart")>("chart");
-    const chartref = ref<HTMLCanvasElement | null>(null);
-    let chart: Chart | null = null;
-    const surveys = ref<Survey[]>([]);
-
-    //watch display change to update chart
-    watch(display, () => {
-        if(display.value === "chart" && chart) {
-            updateChart();
-        }
-    })
-    
-    onMounted(() => {
-        const ctx = chartref.value?.getContext('2d');
-        if (ctx) {
-            chart = new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Repas avec régurgitation',
-                        data: [],
-                        backgroundColor: 'rgb(255, 99, 132)'
-                    }, {
-                        label: 'Repas sans régurgitation',
-                        data: [],
-                        backgroundColor: 'rgb(75, 192, 192)'
-                    }, {
-                        label: 'Change (Pipi)',
-                        data: [],
-                        backgroundColor: 'rgb(255, 205, 86)'
-                    }, {
-                        label: 'Change (Caca)',
-                        data: [], 
-                        backgroundColor: 'rgb(153, 102, 0)',
-                        
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            type: 'time',
-                            time: {
-                                unit: 'day'
-                            }
-                        },
-                        x: {
-                            type: 'linear',
-                            min: 0,
-                            max: 24,
-                            ticks: {
-                                stepSize: 1,
-                                callback(tickValue, index, ticks) {
-                                    return moment(tickValue, 'HH').format('HH:mm');
-                                },
-                            },
-                        }
-                    },
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const date = moment(context.parsed.y).format('DD/MM/YYYY');
-                                    const hours = Math.floor(context.parsed.x);
-                                    const minutes = Math.round((context.parsed.x - hours) * 60);
-                                    const time = moment({ hours, minutes }).format('HH:mm');
-                                    return `${date} ${time}`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // add event listener on element clicked
-            chart.canvas.addEventListener('click', (e) => {
-                if(!chart) return;
-                const element = chart.getElementsAtEventForMode(e, 'nearest', { intersect: true }, true);
-                if (element.length > 0) {
-                    const value = chart.data.datasets[element[0].datasetIndex].data[element[0].index] as any;
-                    if(value.id) {
-                        gotoDetail(value.id);
-                    }
-                }
-            });
-        }
+    // load first batch
+    load({}, batchSize, 0, [{key: "date", order: "desc"}]).then((res) => {
+        events.value.push(...res);
     });
 
-    function gotoDetail(id: number) {
-        document.location.href = `#/survey/${id}`;
-    }
-    
-    async function updateChart() {
-        if (!chart) return;
-
-        const data1 = surveys.value.filter(s => s.type === "Repas" && s.blurp).map(s => { const d = new Date(s.date); return { y: moment(s.date).startOf("day").toDate().getTime(), x: d.getMinutes() / 60 + d.getHours(), id: (s as any)._id } });
-        chart.data.datasets[0].data = data1;
-
-        const data2 = surveys.value.filter(s => s.type === "Repas" && !s.blurp).map(s => { const d = new Date(s.date); return { y: moment(s.date).startOf("day").toDate().getTime(), x: d.getMinutes() / 60 + d.getHours(), id: (s as any)._id } });
-        chart.data.datasets[1].data = data2;
-
-        const data3 = surveys.value.filter(s => s.type === "Change" && s.pee).map(s => { const d = new Date(s.date); return { y: moment(s.date).startOf("day").toDate().getTime(), x: d.getMinutes() / 60 + d.getHours(), id: (s as any)._id } });
-        chart.data.datasets[2].data = data3;
-
-        const data4 = surveys.value.filter(s => s.type === "Change" && s.poop).map(s => { const d = new Date(s.date); return { y: moment(s.date).startOf("day").toDate().getTime() + (s.pee ? 3000000 : 0), x: (d.getMinutes()) / 60 + d.getHours(), id: (s as any)._id } });
-        chart.data.datasets[3].data = data4;
-        
-        chart.update();
-    }
-
-    const tableSet = computed(() => {
-        const set: {day: string, events: {time: string, icons: string[], id: number}[]}[] = [];
-        surveys.value.filter(e => ["Change", "Repas"].indexOf(e.type) !== -1).forEach(s => {
-            const day = moment(s.date).format('DD/MM/YYYY');
-            const time = moment(s.date).format('HH:mm');
-            const icons = [];
-            if (s.type === "Repas") {
-                icons.push("mdi-baby-bottle");
-                if (s.blurp) icons.push("mdi-emoticon-sick");
-            } else if (s.type === "Change") {
-                if (s.pee) icons.push("mdi-water");
-                if (s.poop) icons.push("mdi-emoticon-poop");
+    // infinite scroll
+    const loader = ref<HTMLElement | null>(null);
+    function handleScroll() {
+        let isLoading = false;
+        return async () => {
+            if(isLoading) return;
+            isLoading = true;
+            // if loader is visible, load next batch
+            if(loader.value?.getBoundingClientRect().top! < window.innerHeight) {
+                const res = await load({}, batchSize, events.value.length, [{key: "date", order: "desc"}]);
+                events.value.push(...res);
             }
-            const daySet = set.find(s => s.day === day);
-            if (daySet) {
-                daySet.events.push({ time, icons, id: (s as any)._id });
-            } else {
-                set.push({ day, events: [{ time, icons, id: (s as any)._id }] });
-            }
-        });
-        // sort by day
-        set.sort((a, b) => {
-            const aDate = moment(a.day, 'DD/MM/YYYY');
-            const bDate = moment(b.day, 'DD/MM/YYYY');
-            if (aDate.isBefore(bDate)) return 1;
-            if (aDate.isAfter(bDate)) return -1;
-            return 0;
-        });
-        // sort by time
-        set.forEach(s => s.events.sort((a, b) => {
-            const aDate = moment(a.time, 'HH:mm');
-            const bDate = moment(b.time, 'HH:mm');
-            if (aDate.isBefore(bDate)) return -1;
-            if (aDate.isAfter(bDate)) return 1;
-            return 0;
-        }));
-        return set;
-    })
+            isLoading = false;
+        }
+    }
+    const scroller = handleScroll();
+    setInterval(() => {
+        scroller();
+    }, 1000);
 
-    load({}).then(s => surveys.value = s).then(() => updateChart());
+    // check if event is the first of the day
+    function isFirstOfDay(event: Survey & {_id?: string}) {
+        const index = events.value.findIndex((e) => e._id === event._id);
+        if(index === 0) return true;
+        const prev = events.value[index - 1];
+        return !moment(event.date).isSame(prev.date, 'day');
+    }
 
-    onUnmounted(() => {
-        chart?.destroy();
-    })
 
 </script>
 
-<style scoped>
-    /* first column has blue background */
-    table tr th {
-        background-color: #b0d3ff;
+<style>
+    /* background has a fadeout effect at end of container */
+    .timeline {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    .timeline::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%);
     }
 
-    /* td alternate between white and grey background */
-    table tr td:nth-child(even) {
-        background-color: #b7b7b7;
-    }
-    table tr td:nth-child(odd) {
-        background-color: #e4e4e4;
+    /* container is the scrollable part */
+    .timeline__container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        scroll-behavior: smooth;
     }
 
-    /* td padding and centered */
-    table tr td {
-        padding: 5px;
-        text-align: center;
+    /* item is a 2em circle, the text is written on the left of it */
+    .timeline__item {
+        position: relative;
+        width: 100%;
+        margin: 1.5em 0 0 0;
+        display: flex;
+    }
+    .timeline__item:hover {
+        background: #f0f0f0;
         cursor: pointer;
     }
+    .timeline__datemilestone {
+        width: 70px;
+    }
+    .timeline__item__cicle {
+        content: "";
+        position: absolute;
+        top: 0.1em;
+        left: 70px;
+        width: 2em;
+        height: 2em;
+        border-radius: 50%;
+        background: #000;
+        z-index: 1;
+        color: white !important;
+        text-align: center;
+        line-height: 1.8em;
+    }
+    .timeline__item::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: calc(70px + 1em - 2.5px);
+        width: 5px;
+        height: calc(100% + 1.5em);
+        background: #8a8a8a;
+    }
+
+    .timeline__content {
+        display: flex;
+        flex-direction: column;
+        margin-left: 3em;
+        flex-flow: wrap;
+        line-height: 2em;
+    }
+    .timeline__title {
+        width: 100px;
+    }
+    .timeline__date {
+        width: 80px;
+    }
+
+    /* loader is a centered icon */
+    .timeline__loader {
+        position: relative;
+        width: 100%;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #000;
+    }
+
 </style>

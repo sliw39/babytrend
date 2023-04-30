@@ -7,6 +7,7 @@
       <ul class="navitem">
         <li><router-link to="/">Accueil</router-link></li>
         <li><router-link to="/survey">Saisie</router-link></li>
+        <li><router-link to="/events">Evenements</router-link></li>
         <li><router-link to="/weight">Courbe de poids</router-link></li>
         <li><router-link to="/height">Courbe de taille</router-link></li>
         <li><router-link to="/data">Données brutes</router-link></li>

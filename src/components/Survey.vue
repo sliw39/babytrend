@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { save, get, Survey, SurveyType } from '../io';
+import { gotoDetail } from '../navigation';
 
 export interface SurveyProps {
     surveyId?: string;
@@ -74,7 +75,7 @@ export interface SurveyProps {
       saving.value = true;
       await save({...data, _id: props.surveyId});
       if(props.surveyId) {
-        document.location.href = `#/survey/${props.surveyId}`;
+        gotoDetail(props.surveyId);
       } else {
         reset();
       }

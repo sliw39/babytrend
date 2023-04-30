@@ -1,8 +1,13 @@
 
 declare var API_KEY:string;
 
+// const baseUrl = "https://babytrend-0d4f.restdb.io/rest/survey";
+const baseUrl = "http://192.168.1.200/api/survey";
+
 export type SurveyType = "Change" | "Someil" | "Bain" | "Repas" | "Visite";
+export const SurveyTypeList: SurveyType[] = ["Change", "Someil", "Bain", "Repas", "Visite"];
 export interface Survey {
+    _id?: string,
     date: number,
     type: SurveyType,
     weight?: number,
@@ -16,7 +21,7 @@ export interface Survey {
   }
 
 export async function save(data: Survey & {_id?: string}): Promise<Survey> {
-    const url = data._id ? "https://babytrend-0d4f.restdb.io/rest/survey/" + data._id : "https://babytrend-0d4f.restdb.io/rest/survey";
+    const url = data._id ? baseUrl  + "/" + data._id : baseUrl  + "";
     return fetch(url, {
         method: data._id ? "PUT" : "POST",
         headers: {
@@ -28,7 +33,7 @@ export async function save(data: Survey & {_id?: string}): Promise<Survey> {
 }
 
 export async function remove(id: string): Promise<Survey> {
-    return fetch("https://babytrend-0d4f.restdb.io/rest/survey/" + id, {
+    return fetch(baseUrl  + "/" + id, {
         method: "DELETE",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
@@ -52,18 +57,7 @@ export interface SurveyQuery {
 }
 
 function buildQuery(query: SurveyQuery): string {
-    let q: any = {};
-    if (query.dateFrom) q.date = { $gte: query.dateFrom };
-    if (query.dateTo) q.date = { $lte: query.dateTo };
-    if (query.type) q.type = query.type;
-    if (query.minWeight) q.weight = { $gte: query.minWeight };
-    if (query.minHeight) q.height = { $gte: query.minHeight };
-    if (query.minTemperature) q.temperature = { $gte: query.minTemperature };
-    if (query.blurp) q.blurp = query.blurp;
-    if (query.poop) q.poop = query.poop;
-    if (query.pee) q.pee = query.pee;
-    if (query.eat) q.eat = query.eat;
-    return JSON.stringify(q);
+    return JSON.stringify(query);
 }
 
 export async function load(query: SurveyQuery = {}, max?: number, skip = 0, sortBy: {key:string, order: 'asc'|'desc'}[] = [{key: "date", order: "desc"}]): Promise<Survey[]> {
@@ -72,12 +66,11 @@ export async function load(query: SurveyQuery = {}, max?: number, skip = 0, sort
     if (typeof max === "number") {
         additionnalQuery = `&max=${max}&skip=${skip}`;
         if(sortBy.length > 0) {
-            let firstSort = sortBy[0];
-            additionnalQuery += `&sort=${firstSort.key}&dir=${firstSort.order === "asc" ? 1 : -1}`;
+            additionnalQuery += `&sortBy=${JSON.stringify(sortBy)}`;
         } 
     }
 
-    return fetch("https://babytrend-0d4f.restdb.io/rest/survey?q=" + buildQuery(query) + additionnalQuery, {
+    return fetch(baseUrl  + "?q=" + buildQuery(query) + additionnalQuery, {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
@@ -87,8 +80,7 @@ export async function load(query: SurveyQuery = {}, max?: number, skip = 0, sort
 }
 
 export async function count(query: SurveyQuery = {}): Promise<number> {
-
-    return fetch("https://babytrend-0d4f.restdb.io/rest/survey?totals=true&count=true&q=" + buildQuery(query), {
+    return fetch(baseUrl  + "?count=true&q=" + buildQuery(query), {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",
@@ -99,7 +91,7 @@ export async function count(query: SurveyQuery = {}): Promise<number> {
 
 
 export async function get(surveyId: string): Promise<Survey> {
-    return fetch("https://babytrend-0d4f.restdb.io/rest/survey/" + surveyId, {
+    return fetch(baseUrl  + "/" + surveyId, {
         method: "GET",
         headers: {
             "Content-Type": "application/json; charset=utf-8",

@@ -1,14 +1,14 @@
 <template>
     <div class="cards">
         <QuickActions :key="rerender" @updated="rerender++"></QuickActions>
-        <MealCard :key="rerender" @updated="rerender++"></MealCard>
+        <LastEvents :key="rerender" @updated="rerender++"></LastEvents>
     </div>
     <Timeline :key="rerender" @updated="rerender++"></Timeline>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import MealCard from './MealCard.vue';
+import LastEvents from './LastEvents.vue';
 import QuickActions from './QuickActions.vue';
 import Timeline from './Timeline.vue';
 

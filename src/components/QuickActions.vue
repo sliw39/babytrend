@@ -4,10 +4,7 @@
         <v-card-title>Actions rapides</v-card-title>
         <v-card-text>
             <v-btn-toggle v-model="choices" multiple>
-                <v-btn value="eat"><v-icon size="x-large">mdi-baby-bottle</v-icon></v-btn>
-                <v-btn value="blurp"><v-icon size="x-large">mdi-emoticon-sick</v-icon></v-btn>
-                <v-btn value="pee"><v-icon size="x-large">mdi-water</v-icon></v-btn>
-                <v-btn value="poop"><v-icon size="x-large">mdi-emoticon-poop</v-icon></v-btn>
+                <v-btn v-for="evt of ['eat', 'blurp', 'pee', 'poop'] as (keyof typeof EVENT_TYPE_ICONS)[]" :value="evt"><v-icon size="x-large">{{EVENT_TYPE_ICONS[evt]}}</v-icon></v-btn>
             </v-btn-toggle>
         </v-card-text>
         <v-card-actions>
@@ -20,6 +17,7 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import { load, save } from '../io';
+import { EVENT_TYPE_ICONS } from '../consts';
 
     const choices = ref<("eat"|"blurp"|"pee"|"poop")[]>([]);
     const saving = ref(false);
