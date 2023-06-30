@@ -133,6 +133,7 @@ export interface SurveyProps {
           <v-radio label="Bain" value="Bain"></v-radio>
           <v-radio label="Repas" value="Repas"></v-radio>
           <v-radio label="Visite" value="Visite"></v-radio>
+          <v-radio label="Médicaments" value="Medicament"></v-radio>
         </v-radio-group>
       </v-row>
 
