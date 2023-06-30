@@ -4,7 +4,7 @@ declare var API_KEY:string;
 // const baseUrl = "https://babytrend-0d4f.restdb.io/rest/survey";
 const baseUrl = "http://192.168.1.200/api/survey";
 
-export type SurveyType = "Change" | "Someil" | "Bain" | "Repas" | "Visite";
+export type SurveyType = "Change" | "Someil" | "Bain" | "Repas" | "Visite" | "Medicament";
 export const SurveyTypeList: SurveyType[] = ["Change", "Someil", "Bain", "Repas", "Visite"];
 export interface Survey {
     _id?: string,
@@ -46,7 +46,7 @@ export async function remove(id: string): Promise<Survey> {
 export interface SurveyQuery {
     dateFrom?: number,
     dateTo?: number,
-    type?: "Change" | "Someil" | "Bain" | "Repas" | "Visite",
+    type?: SurveyType,
     minWeight?: number,
     minHeight?: number,
     minTemperature?: number,

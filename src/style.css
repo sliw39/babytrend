@@ -91,3 +91,9 @@ button:focus-visible {
 .mdi-emoticon-sick {
   color: rgb(255, 99, 132);
 }
+.mdi-pill {
+  color: rgb(54, 162, 235);
+}
+.timeline__item__cicle .mdi-pill {
+  color: #fff;
+}

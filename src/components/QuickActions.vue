@@ -4,7 +4,7 @@
         <v-card-title>Actions rapides</v-card-title>
         <v-card-text>
             <v-btn-toggle v-model="choices" multiple>
-                <v-btn v-for="evt of ['eat', 'blurp', 'pee', 'poop'] as (keyof typeof EVENT_TYPE_ICONS)[]" :value="evt"><v-icon size="x-large">{{EVENT_TYPE_ICONS[evt]}}</v-icon></v-btn>
+                <v-btn v-for="evt of ['eat', 'blurp', 'pee', 'poop', 'healthcare'] as (keyof typeof EVENT_TYPE_ICONS)[]" :value="evt"><v-icon size="x-large">{{EVENT_TYPE_ICONS[evt]}}</v-icon></v-btn>
             </v-btn-toggle>
         </v-card-text>
         <v-card-actions>
@@ -17,16 +17,16 @@
 <script setup lang="ts">
     import { ref } from 'vue';
     import { load, save } from '../io';
-import { EVENT_TYPE_ICONS } from '../consts';
+    import { EVENT_TYPE_ICONS } from '../consts';
 
-    const choices = ref<("eat"|"blurp"|"pee"|"poop")[]>([]);
+    const choices = ref<("eat"|"blurp"|"pee"|"poop"|"healthcare")[]>([]);
     const saving = ref(false);
 
     const emits = defineEmits(["updated"]);
 
     const submit = async () => {
         saving.value = true;
-        if(choices.value.indexOf("eat") !== -1 || choices.value.indexOf("eat") !== -1) {
+        if(choices.value.indexOf("eat") !== -1) {
             await save({
                 date: new Date().getTime(),
                 type: "Repas",
@@ -46,6 +46,12 @@ import { EVENT_TYPE_ICONS } from '../consts';
                 type: "Change",
                 pee: choices.value.indexOf("pee") !== -1,
                 poop: choices.value.indexOf("poop") !== -1,
+            });
+        }
+        if(choices.value.indexOf("healthcare") !== -1) {
+            await save({
+                date: new Date().getTime(),
+                type: "Medicament",
             });
         }
         choices.value = [];

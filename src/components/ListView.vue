@@ -50,8 +50,8 @@
 <script setup lang="ts">
     import { onMounted, ref } from 'vue';
     import { Survey, SurveyQuery, count, load, remove } from '../io';
-import { gotoDetail } from '../navigation';
-import { EVENT_TYPE_ICONS } from '../consts';
+    import { gotoDetail } from '../navigation';
+    import { EVENT_TYPE_ICONS } from '../consts';
     export interface ListViewProps {
         query: SurveyQuery;
         limit?: number;

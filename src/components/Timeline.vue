@@ -32,8 +32,8 @@
     import { ref } from 'vue';
     import { Survey, load } from '../io';
     import moment from 'moment';
-import { gotoDetail } from '../navigation';
-import { EVENT_TYPE_ICONS, SURVEY_TYPE_COLORS, SURVEY_TYPE_ICONS } from '../consts';
+    import { gotoDetail } from '../navigation';
+    import { EVENT_TYPE_ICONS, SURVEY_TYPE_COLORS, SURVEY_TYPE_ICONS } from '../consts';
 
     const events = ref([] as (Survey & {_id?: string})[]);
     const batchSize = 30;

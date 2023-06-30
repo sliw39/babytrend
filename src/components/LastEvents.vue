@@ -54,6 +54,9 @@
     }, {
         type: "Bain",
         level: "inherit",
+    }, {
+        type: "Medicament",
+        level: "inherit",
     }] as Evt[]);
 
     function getLevel(warnThreshold: number, errorThreshold: number, diff: number) {
@@ -65,8 +68,9 @@
             return "inherit";
         }
     }
+    
 
-    for(const type of ["Repas", "Change", "Visite", "Bain"] as SurveyType[]) {
+    for(const type of ["Repas", "Change", "Visite", "Bain", "Medicament"] as SurveyType[]) {
         getLast(type).then((last) => {
             if(last) {
                 const evt = events.value.find((e) => e.type === type);
@@ -86,6 +90,21 @@
                     case "Bain":
                         evt.level = getLevel(4, 6, moment().diff(last.date, "days"));
                         break;
+                    case "Medicament":
+                        if(moment(last.date).isBefore(moment().subtract(1, "days").startOf("day"))) {
+                            evt.level = "red";
+                        } else if(moment(last.date).isBefore(moment().startOf("day"))) {
+                            if(moment().isAfter(moment().startOf("day").add(18, "hours"))) {
+                                    evt.level = "red";
+                            } else if (moment().isAfter(moment().startOf("day").add(12, "hours"))) {
+                                evt.level = "orange";
+                            } else {
+                                evt.level = "inherit";
+                            }
+                        } else {
+                            evt.level = "inherit";
+                        }
+                        break;
                 }
 
                 evt._id = (last as any)._id;
@@ -94,6 +113,7 @@
                 if(last.blurp) evt.icons.push(EVENT_TYPE_ICONS["blurp"]);
                 if(last.pee) evt.icons.push(EVENT_TYPE_ICONS["pee"]);
                 if(last.poop) evt.icons.push(EVENT_TYPE_ICONS["poop"]);
+                if(type === "Medicament") evt.icons.push(EVENT_TYPE_ICONS["healthcare"]);
             }
         });
     }
